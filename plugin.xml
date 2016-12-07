@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e107Plugin name="Files" lan="" version="1.0" date="2016-10-18" compatibility="2.0" installRequired="true" >
+	<author name="CaMer0n" url="http://e107.org" />
+	<summary lan="">Simple file download pages and menus for e107.</summary>
+	<description lan="">Ultra-simple file download page and menus utilizing e107's media-manager.</description>
+	<keywords>
+		<word>files</word>
+		<word>download</word>
+		<word>upload</word>
+	</keywords>
+	<category>content</category>
+	<copyright></copyright>
+	<adminLinks>
+		<link url="admin_config.php" description="" icon="images/icon_32.png" iconSmall="images/icon_32.png" icon128="images/icon_128.png" primary="true" >LAN_CONFIGURE</link>
+	</adminLinks>
+	<siteLinks>
+		<link url="{e_PLUGIN}files/files.php" sef='index' perm="admin" >Files</link>
+	</siteLinks>
+	<mediaCategories>
+		<category type="file" perm="public" sef="files-category-one">Files Category One</category>
+	</mediaCategories>
+</e107Plugin>

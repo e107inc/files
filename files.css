@@ -1,0 +1,9 @@
+
+ul.files, ul.categories {
+	margin-top:10px;
+	margin-left:0;
+
+	padding-left:15px
+}
+
+ul.files li, ul.categories li { padding-bottom:15px; padding-left:0;}
