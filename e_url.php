@@ -31,7 +31,7 @@ class files_url // plugin-folder + '_url'
 			'alias'         => 'files',
 			'regex'			=> '^{alias}/get/([\d]*)/([^\/]*)/?$',
 			'sef'			=> '{alias}/get/{id}/{name}',
-			'redirect'		=> '{e_BASE}request.php?file=$1',
+			'redirect'		=> '{e_PLUGIN}files/files.php?get=$1',
 		);
 
 

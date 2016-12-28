@@ -65,14 +65,16 @@ class files_ui extends e_admin_ui
 	
 		protected $fields 		= array();
 		
-		protected $fieldpref = array();
+	//	protected $fieldpref = array(LAN_GENERAL,"Torrents");
 		
 
-	//	protected $preftabs        = array('General', 'Other' );
+		protected $preftabs        =array(LAN_GENERAL,"Torrent Mode");
 		protected $prefs = array(
 			'page_title'        => array('title'=>'Page Title', 'type'=>'text', 'data'=>'str', 'multilan'=>true, 'writeParms'=>array('size'=>'xxlarge')),
-			'page_header'        => array('title'=>'Page Header', 'type'=>'bbarea', 'data'=>'str', 'multilan'=>true, 'writeParms'=>array('size'=>'xxlarge')),
+			'page_header'       => array('title'=>'Page Header', 'type'=>'bbarea', 'data'=>'str', 'multilan'=>true, 'writeParms'=>array('size'=>'xxlarge')),
 			'file_order'        => array('title'=>'File Order', 'type'=>'dropdown', 'data'=>'str', 'writeParms'=>array()),
+			'torrentMode'       => array('title'=>'Torrent Mode', 'type'=>'boolean', 'tab'=>1, 'data'=>'int','help'=>'Auto-create torrent files for all files.', 'writeParms'=>array()),
+			'torrentTrackers'   => array('title'=>'Tracker URLs', 'type'=>'textarea', 'tab'=>1, 'data'=>'str', 'help'=>'One per line', 'writeParms'=>array('size'=>'xxlarge')),
 
 		);
 
@@ -105,9 +107,7 @@ class files_ui extends e_admin_ui
 		{
 			// do something		
 		}		
-		
-		
-		// ------- Customize Update --------
+			// ------- Customize Update --------
 		
 		public function beforeUpdate($new_data, $old_data, $id)
 		{

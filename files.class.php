@@ -17,15 +17,12 @@
 		private $mode= 'page';
 		private $pageTitle = "Files";
 		private $listLimit = 20;
+		private $torrentMode = false;
+		private $torrentTrackers = array();
+		private $filesPref = array();
 
 		function __construct()
 		{
-			$this->categories = e107::getMedia()->getCategories('files');
-
-			if(!empty($_GET['catsef']))
-			{
-				$this->currentCategory = $this->getCategoryFromSef($_GET['catsef']);
-			}
 
 			$filesPref = e107::pref('files');
 
@@ -34,7 +31,139 @@
 				$this->pageTitle = $filesPref['page_title'][e_LANGUAGE];
 			}
 
+			$this->categories = e107::getMedia()->getCategories('files');
+
+			$this->filePref = $filesPref;
+			$this->setTrackers();
+
+			if(!empty($this->filePref['torrentMode']))
+			{
+				$this->torrentMode = true;
+			}
+
+
 		}
+
+		private function setTrackers()
+		{
+			if(empty($this->filesPref['torrentTrackers']))
+			{
+				return false;
+			}
+
+			$tmp = explode($this->filesPref['torrentTrackers'],"\n");
+
+			foreach($tmp as $val)
+			{
+				if(!empty($val))
+				{
+					$this->torrentTrackers[] = trim($val);
+
+				}
+			}
+
+		}
+
+		/**
+		 * Detect $_GET and set
+		 */
+		public function init()
+		{
+			if(!empty($_GET['get']))
+			{
+				$this->sendFile($_GET['get']);
+				exit;
+			}
+
+
+
+			if(!empty($_GET['catsef']))
+			{
+				$this->currentCategory = $this->getCategoryFromSef($_GET['catsef']);
+			}
+
+
+		}
+
+
+		private function sendFile($id)
+		{
+			$id = intval($id);
+
+			$sql = e107::getDb();
+			if ($sql->select('core_media', 'media_id,media_name,media_caption,media_url', "media_id= ".$id." AND media_userclass IN (".USERCLASS_LIST.") LIMIT 1 "))
+			{
+				$row = $sql->fetch();
+				// $file = $tp->replaceConstants($row['media_url'],'rel');
+
+				if($this->torrentMode === true)
+				{
+
+					$this->sendTorrent($row);
+					exit;
+				}
+				else
+				{
+					e107::getFile()->send($row['media_url']);
+					exit;
+				}
+
+
+			}
+
+			return false; 
+
+		}
+
+
+		private function sendTorrent($row)
+		{
+
+			require_once("Torrent.php");
+			$oFile = basename($row['media_url']);
+			$nFile = $oFile.".torrent";
+
+			$path = e107::getFile()->getUserDir(false, true);
+
+			if(file_exists($path.$nFile))
+			{
+				e107::getFile()->send($path.$nFile);
+				return true;
+
+			}
+
+
+			$oFilePath = e107::getParser()->replaceConstants($row['media_url']);
+
+			$name = vartrue($row['media_caption'],$row['media_name']);
+			$parm = array('id'=>$row['media_id'], 'name'=> eHelper::title2sef($name,'dashl'));
+			$url = e107::url('files', 'get', $parm);
+
+			$torrent = new Torrent($oFilePath);
+			$torrent->announce($this->torrentTrackers); // set tiered trackers
+		//	$torrent->comment('hello world');
+			$torrent->name($name);
+			$torrent->is_private(false);
+		//	$torrent->httpseeds('http://file-hosting.domain/path/'); // Bittornado implementation
+		//	$torrent->url_list(array('http://file-hosting.domain/path/','http://another-file-hosting.domain/path/')); // GetRight implementation
+			$torrent->httpseeds($url);
+			$torrent->url_list($url);
+
+			// print errors
+			if( $errors = $torrent->errors())
+			{
+				e107::getDebug()->log($errors);
+				return false;
+			}
+
+			$torrent->save($path.$nFile);
+			$torrent->send();
+
+
+			return true;
+
+		}
+
 
 
 		public function setMode($mode)
@@ -87,7 +216,7 @@
 				$text .= "<div class='files-page-header'>".$tp->toHtml($filesPref['page_header'][e_LANGUAGE],true)."</div>";
 			}
 
-			$text .= "<div class='files-page'>";
+			$text .= ($this->mode === 'page') ? "<div class='files-page'>" : "<div class='files-menu'>";
 			$text .= "<ul class='categories'>";
 
 			foreach($this->categories as $key=>$row)

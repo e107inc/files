@@ -20,6 +20,7 @@ require_once(e_PLUGIN.'files/files.class.php');
 e107::css('files', 'files.css');
 
 $filesFront = new pluginFiles;
+$filesFront->init();
 require_once(HEADERF); 					// render the header (everything before the main content area)
 $ret = $filesFront->render();
 

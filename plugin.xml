@@ -19,4 +19,12 @@
 	<mediaCategories>
 		<category type="file" perm="public" sef="files-category-one">Files Category One</category>
 	</mediaCategories>
+	<pluginPrefs>
+		<pref name="torrentMode">0</pref>
+		<pref name="torrentTrackers">http://tracker.publicbt.com:80/announce
+http://tracker.openbittorrent.com:80/announce
+udp://tracker.publicbt.com:6969/announce
+udp://tracker.openbittorrent.com:6969/announce
+		</pref>
+	</pluginPrefs>
 </e107Plugin>
