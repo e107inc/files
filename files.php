@@ -30,4 +30,3 @@ exit;
 
 // For a more elaborate plugin - please see e107_plugins/gallery
 
-?>

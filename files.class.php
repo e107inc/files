@@ -36,7 +36,7 @@
 			$this->filePref = $filesPref;
 			$this->setTrackers();
 
-			if(!empty($this->filePref['torrentMode']))
+			if(!empty($this->filePref['torrentMode']) )
 			{
 				$this->torrentMode = true;
 			}
@@ -46,12 +46,16 @@
 
 		private function setTrackers()
 		{
-			if(empty($this->filesPref['torrentTrackers']))
+			if(empty($this->filePref['torrentTrackers']))
 			{
+				$this->log("No Trackers Present");
 				return false;
 			}
 
-			$tmp = explode($this->filesPref['torrentTrackers'],"\n");
+
+
+			$tmp = explode(PHP_EOL, $this->filePref['torrentTrackers']);
+
 
 			foreach($tmp as $val)
 			{
@@ -64,6 +68,13 @@
 
 		}
 
+
+		private function log($message)
+		{
+			// file_put_contents(e_PLUGIN."files/torrent.log", date('r')."\t\t\t". $message."\n",FILE_APPEND);
+		}
+
+
 		/**
 		 * Detect $_GET and set
 		 */
@@ -75,7 +86,11 @@
 				exit;
 			}
 
-
+			if(!empty($_GET['tor']))
+			{
+				$this->sendFile($_GET['tor'], 'torrent');
+				exit;
+			}
 
 			if(!empty($_GET['catsef']))
 			{
@@ -86,7 +101,7 @@
 		}
 
 
-		private function sendFile($id)
+		private function sendFile($id, $mode = 'file')
 		{
 			$id = intval($id);
 
@@ -96,7 +111,7 @@
 				$row = $sql->fetch();
 				// $file = $tp->replaceConstants($row['media_url'],'rel');
 
-				if($this->torrentMode === true)
+				if($this->torrentMode === true && $mode === 'torrent')
 				{
 
 					$this->sendTorrent($row);
@@ -127,17 +142,20 @@
 
 			if(file_exists($path.$nFile))
 			{
-				e107::getFile()->send($path.$nFile);
-				return true;
+			//	e107::getFile()->send($path.$nFile);
+			//	return true;
 
 			}
 
 
 			$oFilePath = e107::getParser()->replaceConstants($row['media_url']);
 
-			$name = vartrue($row['media_caption'],$row['media_name']);
+		//	$name = vartrue($row['media_caption'],$row['media_name']);
+
+			$name= basename($oFilePath);
 			$parm = array('id'=>$row['media_id'], 'name'=> eHelper::title2sef($name,'dashl'));
-			$url = e107::url('files', 'get', $parm);
+			$opt = array('mode'=>'full');
+			$url = e107::url('files', 'get', $parm, $opt);
 
 			$torrent = new Torrent($oFilePath);
 			$torrent->announce($this->torrentTrackers); // set tiered trackers
@@ -155,6 +173,9 @@
 				e107::getDebug()->log($errors);
 				return false;
 			}
+
+
+			$this->log(print_r($torrent,true));
 
 			$torrent->save($path.$nFile);
 			$torrent->send();
@@ -213,7 +234,7 @@
 
 			if(!empty($filesPref['page_header'][e_LANGUAGE]) && $this->mode === 'page')
 			{
-				$text .= "<div class='files-page-header'>".$tp->toHtml($filesPref['page_header'][e_LANGUAGE],true)."</div>";
+				$text .= "<div class='files-page-header'>".$tp->toHTML($filesPref['page_header'][e_LANGUAGE],true)."</div>";
 			}
 
 			$text .= ($this->mode === 'page') ? "<div class='files-page'>" : "<div class='files-menu'>";
@@ -263,7 +284,7 @@
 			if(!empty($this->categories[$this->currentCategory]['media_cat_diz']))
 			{
 				$text = $this->categories[$this->currentCategory]['media_cat_diz'];
-				return e107::getParser()->toHtml($text);
+				return e107::getParser()->toHTML($text);
 			}
 
 			return false;
@@ -310,15 +331,18 @@
 
 			$text .= "<ul class='files'>";
 
+
+			$mode = !empty($this->torrentMode) ? 'tor' : 'get';
+
 			foreach($data as $id=>$row)
 			{
 				$name = vartrue($row['media_caption'],$row['media_name']);
 				$parm = array('id'=>$id, 'name'=> eHelper::title2sef($name,'dashl'));
-				$url = e107::url('files', 'get', $parm);
+				$url = e107::url('files', $mode, $parm);
 				$bbcode = "<a href='".$url."'>".$name."</a>";
 
 				$text .= "<li>".$bbcode." <small class='text-muted'>(".$fl->file_size_encode($row['media_size'], false, 0).")</small>
-							<div class='files-description'><small >".$tp->toHtml($row['media_description'],true)."</small></li>";
+							<div class='files-description'><small >".$tp->toHTML($row['media_description'],true)."</small></li>";
 
 			}
 

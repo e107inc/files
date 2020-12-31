@@ -25,7 +25,12 @@ class files_url // plugin-folder + '_url'
 	{
 		$config = array();
 
-
+		$config['tor'] = array(
+			'alias'         => 'files',
+			'regex'			=> '^{alias}/tor/([\d]*)/([^\/]*)/?$',
+			'sef'			=> '{alias}/tor/{id}/{name}',
+			'redirect'		=> '{e_PLUGIN}files/files.php?tor=$1',
+		);
 
 		$config['get'] = array(
 			'alias'         => 'files',
